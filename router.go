@@ -1,7 +1,7 @@
 package main
 
 import (
-	"NewWork/controller"
+	"TikTok/controller"
 	"github.com/gin-gonic/gin"
 )
 

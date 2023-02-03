@@ -1,7 +1,7 @@
 package main
 
 import (
-	"NewWork/dao"
+	"TikTok/dao"
 	"github.com/gin-gonic/gin"
 )
 

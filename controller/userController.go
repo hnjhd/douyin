@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"NewWork/dao"
+	"TikTok/dao"
 	"errors"
 	"fmt"
 	"net/http"
