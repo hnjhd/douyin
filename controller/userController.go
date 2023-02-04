@@ -2,8 +2,8 @@ package controller
 
 import (
 	"TikTok/dao"
+	"TikTok/service"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -33,9 +33,9 @@ func getuser(u dao.User) user {
 func Register(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
-	u, err := dao.GetUserByUserName(username)
-	//fmt.Println(u)
-	if err != nil {
+	usi := service.UserServiceImpl{}
+	u, err := usi.GetUserByUsername(username)
+	if err != nil && err.Error() != "record not found" {
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 1,
 			"status_msg":  err.Error(),
@@ -51,8 +51,6 @@ func Register(c *gin.Context) {
 			"user_id":     nil,
 			"token":       nil,
 		})
-		//fmt.Println(c)
-		fmt.Println(-2)
 	} else {
 		newUser := dao.User{
 			UserName: username,
@@ -67,7 +65,6 @@ func Register(c *gin.Context) {
 			})
 			return
 		}
-		//fmt.Println("注册返回的id: ", newUser.Model.ID)
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 0,
 			"status_msg":  nil,
@@ -81,8 +78,9 @@ func Register(c *gin.Context) {
 func Login(c *gin.Context) {
 	username := c.Query("username")
 	password := c.Query("password")
-	//fmt.Println("-orz2\n\n\n\n\n\n\n\n")
-	u, err := dao.GetUserByUserName(username)
+
+	usi := service.UserServiceImpl{}
+	u, err := usi.GetUserByUsername(username)
 	if err != nil || u.Model.ID == 0 {
 		if u.Model.ID == 0 {
 			err = errors.New("用户不存在")
@@ -93,11 +91,10 @@ func Login(c *gin.Context) {
 			"user_id":     nil,
 			"token":       nil,
 		})
+		//log.Println("Login ", err)
 		return
 	}
-	//fmt.Println("-orz3\n\n\n\n\n\n\n\n")
-	password = dao.GetSha256(password)
-	//fmt.Println("-orz4\n\n\n\n\n\n\n\n")
+	password = usi.GetSha256(password)
 	if u.Password == password {
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 0,
@@ -105,7 +102,6 @@ func Login(c *gin.Context) {
 			"user_id":     u.Model.ID,
 			"token":       u.NewToken(),
 		})
-		//fmt.Println(-3)
 	} else {
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 1,
@@ -113,15 +109,14 @@ func Login(c *gin.Context) {
 			"user_id":     nil,
 			"token":       nil,
 		})
-		//fmt.Println(-4)
 	}
 }
 
 // UserInfo GET douyin/user/ 用户信息
 func UserInfo(c *gin.Context) {
+	token := c.Query("token")
 	user_id := c.Query("user_id")
 	id, err := strconv.ParseInt(user_id, 10, 64)
-	fmt.Println(id, err)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 1,
@@ -130,8 +125,8 @@ func UserInfo(c *gin.Context) {
 		})
 		return
 	}
-	//fmt.Println(-1)
-	u, err := dao.GetUserByUserID(uint(id))
+	usi := service.UserServiceImpl{}
+	userid, err := usi.GetparseTokens(token)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 1,
@@ -139,11 +134,27 @@ func UserInfo(c *gin.Context) {
 			"user":        nil,
 		})
 		return
-	} else {
+	}
+	if uint(id) != userid {
 		c.JSON(http.StatusOK, gin.H{
 			"status_code": 1,
-			"status_msg":  nil,
-			"user":        getuser(u),
+			"status_msg":  "token错误",
+			"user":        nil,
 		})
+		return
 	}
+	u, err := usi.GetUserById(uint(id))
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status_code": 1,
+			"status_msg":  err.Error(),
+			"user":        nil,
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status_code": 1,
+		"status_msg":  nil,
+		"user":        getuser(u),
+	})
 }

@@ -35,6 +35,32 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
+// 生成相应的权限
+func (u *User) NewToken() string {
+	expiresTime := time.Now().Unix() + int64(86400)
+	fmt.Printf("expiresTime: %v\n", expiresTime)
+	id64 := int64(u.Model.ID)
+	//fmt.Printf("id: %v\n", strconv.FormatInt(id64, 10))
+	claims := jwt.StandardClaims{
+		Audience:  u.UserName,
+		ExpiresAt: expiresTime,
+		Id:        strconv.FormatInt(id64, 10),
+		IssuedAt:  time.Now().Unix(),
+		Issuer:    "tiktok",
+		NotBefore: time.Now().Unix(),
+		Subject:   "token",
+	}
+	var jwtSecret = []byte("tiktok")
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	if token, err := tokenClaims.SignedString(jwtSecret); err == nil {
+		println("generate token success!\n")
+		return token
+	} else {
+		println("generate token fail\n")
+		return "fail"
+	}
+}
+
 // 判定密码的合法性
 func cheak(str string) error {
 	if len(str) > 32 {
@@ -63,15 +89,11 @@ func GetUserByUserName(UserName string) (User, error) {
 	user := User{}
 	M := DB.Where(User{UserName: UserName}).First(&user)
 	err := M.Error
-	//fmt.Println("\n\n\n")
-	//fmt.Println(user, err)
-	//fmt.Println("\n\n\n")
-	if err != nil && err.Error() != "record not found" {
-		log.Println(err)
+	if err != nil {
+		//log.Println(err)
 		return user, err
 	}
 	return user, nil
-	// return tableUser, nil
 }
 
 // 使用ID进行查询
@@ -99,29 +121,12 @@ func (u *User) InsertUser() (bool, error) {
 	return true, nil
 }
 
-// 生成相应的权限
-func (u *User) NewToken() string {
-	expiresTime := time.Now().Unix() + int64(86400)
-	fmt.Printf("expiresTime: %v\n", expiresTime)
-	id64 := int64(u.Model.ID)
-	//fmt.Printf("id: %v\n", strconv.FormatInt(id64, 10))
-	claims := jwt.StandardClaims{
-		Audience:  u.UserName,
-		ExpiresAt: expiresTime,
-		Id:        strconv.FormatInt(id64, 10),
-		IssuedAt:  time.Now().Unix(),
-		Issuer:    "tiktok",
-		NotBefore: time.Now().Unix(),
-		Subject:   "token",
+// GetUserList 获取全部TableUser对象
+func GetUserList() ([]User, error) {
+	tableUsers := []User{}
+	if err := DB.Find(&tableUsers).Error; err != nil {
+		log.Println(err.Error())
+		return tableUsers, err
 	}
-	var jwtSecret = []byte("tiktok")
-	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	if token, err := tokenClaims.SignedString(jwtSecret); err == nil {
-		token = "Bearer " + token
-		println("generate token success!\n")
-		return token
-	} else {
-		println("generate token fail\n")
-		return "fail"
-	}
+	return tableUsers, nil
 }
