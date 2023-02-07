@@ -10,7 +10,7 @@ func StructInit() error {
 		M.CreateTable(&User{})
 	}
 	if M.HasTable(&LikeList{}) == false {
-		M.CreateTable(&User{})
+		M.CreateTable(&LikeList{})
 	}
 	// u := User{
 	// 	UserName: "cylxxx",
