@@ -11,6 +11,10 @@ func initRouter(r *gin.Engine) {
 	go apiRouter.GET("/user/", controller.UserInfo)
 	go apiRouter.POST("/user/register/", controller.Register)
 	go apiRouter.POST("/user/login/", controller.Login)
+
 	go apiRouter.POST("/favorite/action/", controller.FavoriteAction)
 	go apiRouter.GET("/favorite/list/", controller.FavoriteList)
+
+	go apiRouter.POST("/comment/action/", controller.CommentAction)
+	go apiRouter.GET("/comment/list/", controller.CommentList)
 }
