@@ -11,7 +11,7 @@ import (
 )
 
 type TableVideo struct {
-	Model       gorm.Model
+	Model       gorm.Model `gorm:"embedded"`
 	AuthorId    int64
 	PlayUrl     string `json:"play_url"`
 	CoverUrl    string `json:"cover_url"`
