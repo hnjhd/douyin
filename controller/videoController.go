@@ -10,11 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Response struct {
-	StatusCode int32  `json:"status_code"`
-	StatusMsg  string `json:"status_msg,omitempty"`
-}
-
 type FeedResponse struct {
 	Response
 	VideoList []service.Video `json:"video_list"`
