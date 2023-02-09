@@ -153,7 +153,7 @@ func UserInfo(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status_code": 1,
+		"status_code": 0,
 		"status_msg":  nil,
 		"user":        getuser(u),
 	})
