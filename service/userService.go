@@ -20,3 +20,13 @@ type UserService interface {
 	//对token进行解析,拿到的是user_id
 	GetparseTokens(token string) (uint, error)
 }
+
+type UserDTO struct {
+	Id             int64  `json:"id,omitempty"`
+	Name           string `json:"name,omitempty"`
+	FollowCount    int64  `json:"follow_count"`
+	FollowerCount  int64  `json:"follower_count"`
+	IsFollow       bool   `json:"is_follow"`
+	TotalFavorited int64  `json:"total_favorited,omitempty"`
+	FavoriteCount  int64  `json:"favorite_count,omitempty"`
+}

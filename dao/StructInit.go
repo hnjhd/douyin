@@ -12,12 +12,9 @@ func StructInit() error {
 	if M.HasTable(&LikeList{}) == false {
 		M.CreateTable(&LikeList{})
 	}
-	// u := User{
-	// 	UserName: "cylxxx",
-	// 	Password: "1234567",
-	// }
-	// fg, err := u.InsertUser()
-	// fmt.Println(u, "\n", fg, " ", err)
-	// fmt.Println(u.NewToken())
+	if M.HasTable(&TableVideo{}) == false {
+		M.CreateTable(&TableVideo{})
+	}
+	
 	return nil
 }

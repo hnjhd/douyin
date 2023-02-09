@@ -25,7 +25,7 @@ func Init() error {
 		},
 	)
 	var err error
-	dsn := "root:openGauss@123@tcp(123.249.111.225:3306)/gorm_class?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:JCLee@.@tcp(124.71.58.18:3306)/tiktok?charset=utf8mb4&parseTime=True&loc=Local"
 	//想要正确的处理time.Time,需要带上 parseTime 参数，
 	//要支持完整的UTF-8编码，需要将 charset=utf8 更改为 charset=utf8mb4
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
