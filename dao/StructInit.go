@@ -15,6 +15,9 @@ func StructInit() error {
 	if M.HasTable(&TableVideo{}) == false {
 		M.CreateTable(&TableVideo{})
 	}
+	if M.HasTable(&Comment{}) == false {
+		M.CreateTable(&Comment{})
+	}
 	
 	return nil
 }
