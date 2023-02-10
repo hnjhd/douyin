@@ -70,13 +70,13 @@ func VideoFTP(file io.Reader, videoName string) error {
 }
 
 // 通过FTP上传图片
-func ImageFTP(file io.Reader, videoName string) error {
+func ImageFTP(file io.Reader, imageName string) error {
 	err := ftp.TIKTOK_FTP.Cwd("images")
 	if err != nil {
 		log.Println("切换到images路径失败")
 		return err
 	}
-	err = ftp.TIKTOK_FTP.Stor(videoName, file)
+	err = ftp.TIKTOK_FTP.Stor(imageName, file)
 	if err != nil {
 		log.Println("上传失败")
 		return err
