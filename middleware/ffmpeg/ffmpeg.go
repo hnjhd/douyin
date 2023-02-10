@@ -30,7 +30,7 @@ func InitSSH() {
 	addr := fmt.Sprintf("%s:%d", config.SSH_HOST, config.SSH_PORT)
 	ClientSSH, err = ssh.Dial("tcp", addr, SSHConfig)
 	if err != nil {
-		log.Fatal("ssh client失败", err)
+		log.Println("ssh client失败", err)
 	}
 	Ffchan = make(chan Ffmsg, config.SSH_MAX_MESSAGE_COUNT)
 	go dispatcher()
@@ -43,7 +43,7 @@ func dispatcher() {
 			err := Ffmpeg(f.VideoName, f.ImageName)
 			if err != nil {
 				Ffchan <- f
-				log.Fatal("重新派遣")
+				log.Println("重新派遣")
 			}
 		}(ffmsg)
 	}
@@ -52,12 +52,12 @@ func dispatcher() {
 func Ffmpeg(videoName string, imageName string) error {
 	session, err := ClientSSH.NewSession()
 	if err != nil {
-		log.Fatal("ssh session创建失败", err)
+		log.Println("ssh session创建失败", err)
 	}
 	defer session.Close()
-	command , err := session.CombinedOutput("ls;/usr/local/ffmpeg/bin/ffmpeg -ss 00:00:01 -i /home/ftpuser/video/" + videoName + ".mp4 -vframes 1 /home/ftpuser/images/" + imageName + ".jpg")
+	command , err := session.CombinedOutput("ls;/usr/local/ffmpeg/bin/ffmpeg -ss 00:00:01 -i /home/ftpjc/videos/" + videoName + ".mp4 -vframes 1 /home/ftpjc/images/" + imageName + ".jpg")
 	if err != nil {
-		log.Fatal("session.CombinedOutput() 失败", command)
+		log.Println("session.CombinedOutput() 失败", command)
 		return err
 	}
 	return nil

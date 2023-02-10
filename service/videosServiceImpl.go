@@ -19,12 +19,12 @@ func (videoService VideoServiceImpl) Feed(lastTime time.Time, userId int64) ([]V
 	videos := make([]Video, 0, config.VideoCount)
 	tableVideos, err := dao.GetVideoByLastTime(lastTime)
 	if err != nil {
-		log.Fatal("dao.GetVideoByLastTime(lastTime) 失败", err)
+		log.Println("dao.GetVideoByLastTime(lastTime) 失败", err)
 		return nil, time.Time{}, err
 	}
 	err = videoService.copyVideos(&videos, &tableVideos, userId)
 	if err != nil {
-		log.Fatal("videoService.copyVideos(&videos, &tableVideos, userId) 失败", err)
+		log.Println("videoService.copyVideos(&videos, &tableVideos, userId) 失败", err)
 		return nil, time.Time{}, err
 	}
 	return videos, tableVideos[len(tableVideos) - 1].PublishTime, nil
@@ -35,7 +35,7 @@ func (videoService *VideoServiceImpl) GetVideo(videoId int64, userId int64) (Vid
 	var video Video
 	data, err := dao.GetVideosByVideoId(videoId)
 	if err != nil {
-		log.Fatal("dao.GetVideosByVideoId(videoId) 失败", err)
+		log.Println("dao.GetVideosByVideoId(videoId) 失败", err)
 		return video, err
 	}
 	videoService.createVideo(&video, &data, userId)
@@ -46,13 +46,14 @@ func (videoService *VideoServiceImpl) GetVideo(videoId int64, userId int64) (Vid
 func (videoService *VideoServiceImpl) Publish(data *multipart.FileHeader, userId int64, title string) error {
 	file, err := data.Open()
 	if err != nil {
-		log.Fatal("data.Open() 失败", err)
+		log.Println("data.Open() 失败", err)
 		return err
 	}
 	videoName := uuid.NewV4().String()
+	log.Println("视频名字" + videoName)
 	err = dao.VideoFTP(file, videoName)
 	if err != nil {
-		log.Fatal("dao.VideoFTP(file, videoName) 失败", err)
+		log.Println("dao.VideoFTP(file, videoName) 失败", err)
 		return err
 	}
 	defer file.Close()
@@ -63,7 +64,7 @@ func (videoService *VideoServiceImpl) Publish(data *multipart.FileHeader, userId
 	}
 	err = dao.Save(videoName, imageName, userId, title)
 	if err != nil {
-		log.Fatal("dao.Save(videoName, imageName, userId, title) 失败", err)
+		log.Println("dao.Save(videoName, imageName, userId, title) 失败", err)
 		return err
 	}
 	return nil
@@ -73,13 +74,13 @@ func (videoService *VideoServiceImpl) Publish(data *multipart.FileHeader, userId
 func (videoService *VideoServiceImpl) List(userId int64, curId int64) ([]Video, error) {
 	data, err := dao.GetVideosByAuthorId(userId)
 	if err != nil {
-		log.Fatal("dao.GetVideosByAuthorId(userId) 失败", err)
+		log.Println("dao.GetVideosByAuthorId(userId) 失败", err)
 		return nil, err
 	}
 	result := make([]Video, 0, len(data))
 	err = videoService.copyVideos(&result, &data, curId)
 	if err != nil {
-		log.Fatal("videoService.copyVideos(&result, &data, curId) 失败", err)
+		log.Println("videoService.copyVideos(&result, &data, curId) 失败", err)
 		return nil, err
 	}
 	return result, nil
@@ -89,7 +90,7 @@ func (videoService *VideoServiceImpl) List(userId int64, curId int64) ([]Video, 
 func (videoService *VideoServiceImpl) GetVideoIdList(authorId int64) ([]int64, error) {
 	ids, err := dao.GetVideoIdsByAuthorId(authorId)
 	if err != nil {
-		log.Fatal("dao.GetVideoIdsByAuthorId(authorId) 失败", err)
+		log.Println("dao.GetVideoIdsByAuthorId(authorId) 失败", err)
 		return nil, err
 	}
 	return ids, nil
@@ -111,7 +112,7 @@ func (videoService *VideoServiceImpl) createVideo(video *Video, data *dao.TableV
 	video.TableVideo = *data
 	tableUser, err := videoService.GetUserById(uint(userId))
 	if err != nil {
-		log.Fatal("usi.GetUseById(uint(id)) 失败", err)
+		log.Println("usi.GetUseById(uint(id)) 失败", err)
 	}
 	// TODO 后期拓展
 	video.Author = UserDTO{
