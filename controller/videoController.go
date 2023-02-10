@@ -27,7 +27,7 @@ func Feed(c *gin.Context) {
 	var lastTime time.Time
 	if createTime != "0" {
 		temp, _ := strconv.ParseInt(createTime, 10, 64)
-		lastTime = time.Unix(temp, 0)
+		lastTime = time.Unix(temp / 1000, 0)
 	} else {
 		lastTime = time.Now()
 	}
