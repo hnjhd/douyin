@@ -56,6 +56,7 @@ func GetVideosByVideoId(videoId int64) (TableVideo, error) {
 
 // 通过FTP上传视频
 func VideoFTP(file io.Reader, videoName string) error {
+	ftp.TIKTOK_FTP.Cwd("~")
 	err := ftp.TIKTOK_FTP.Cwd("videos")
 	if err != nil {
 		log.Println("切换到videos路径失败")
