@@ -50,7 +50,6 @@ func (videoService *VideoServiceImpl) Publish(data *multipart.FileHeader, userId
 		return err
 	}
 	videoName := uuid.NewV4().String()
-	log.Println("视频名字" + videoName)
 	err = dao.VideoFTP(file, videoName)
 	if err != nil {
 		log.Println("dao.VideoFTP(file, videoName) 失败", err)
