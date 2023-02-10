@@ -64,7 +64,7 @@ func Publish(c *gin.Context) {
 	userId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
 	title := c.PostForm("title")
 	if err != nil {
-		log.Fatal("获取数据失败", err)
+		log.Println("获取数据失败", err)
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg: err.Error(),
@@ -74,7 +74,7 @@ func Publish(c *gin.Context) {
 	videoService := GetVideoService()
 	err = videoService.Publish(data, userId, title)
 	if err != nil {
-		log.Fatal("上传视频失败", err)
+		log.Println("上传视频失败", err)
 		c.JSON(http.StatusOK, Response{
 			StatusCode: 1,
 			StatusMsg: err.Error(),
@@ -95,7 +95,7 @@ func PublishList(c *gin.Context) {
 	videoService := GetVideoService()
 	list, err := videoService.List(userId, curId)
 	if err != nil {
-		log.Fatal("获取视频列表失败")
+		log.Println("获取视频列表失败")
 		c.JSON(http.StatusOK, VideoListResponse{
 			Response: Response{
 				StatusCode: 1,
