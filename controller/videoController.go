@@ -27,7 +27,10 @@ func Feed(c *gin.Context) {
 	var lastTime time.Time
 	if createTime != "0" {
 		temp, _ := strconv.ParseInt(createTime, 10, 64)
-		lastTime = time.Unix(temp / 1000, 0)
+		if len(createTime) > 10 {
+			temp /= 1000
+		}
+		lastTime = time.Unix(temp, 0)
 	} else {
 		lastTime = time.Now()
 	}
@@ -55,8 +58,14 @@ func Feed(c *gin.Context) {
 
 // Publish /publish/action/
 func Publish(c *gin.Context) {
+	token := c.Query("token")
+	videoService := GetVideoService()
+	userid, err := videoService.GetparseTokens(token)
 	data, err := c.FormFile("data")
-	userId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	log.Println("转化前token: ", token)
+	log.Println("转化前id: ", userid)
+	userId := int64(userid)
+	log.Println("转化后id: ", userid)
 	title := c.PostForm("title")
 	if err != nil {
 		log.Println("获取数据失败", err)
@@ -66,7 +75,7 @@ func Publish(c *gin.Context) {
 		})
 		return
 	}
-	videoService := GetVideoService()
+	// videoService := GetVideoService()
 	err = videoService.Publish(data, userId, title)
 	if err != nil {
 		log.Println("上传视频失败", err)

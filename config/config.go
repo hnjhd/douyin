@@ -4,8 +4,8 @@ package config
 const VideoCount = 5
 
 // 存储视频连接
-const PLAY_URL_PREFIX = "http://124.71.58.18/videos/"
-const COVER_URL_PREFIX = "http://124.71.58.18/images/"
+const PLAY_URL_PREFIX = "ftp://124.71.58.18/tiktok/videos/"
+const COVER_URL_PREFIX = "ftp://124.71.58.18/tiktok/images/"
 
 // FTP 服务器地址
 const FTP_IP = "124.71.58.18:21"

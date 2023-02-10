@@ -19,9 +19,9 @@ type TableVideo struct {
 	Title       string `json:"title"`
 }
 
-func (TableVideo) TableName() string {
-	return "videos"
-}
+// func (TableVideo) TableName() string {
+// 	return "videos"
+// }
 
 // 根据作者id查询视频
 func GetVideosByAuthorId(authorId int64) ([]TableVideo, error) {
@@ -107,5 +107,6 @@ func GetVideoByLastTime(lastTime time.Time) ([]TableVideo, error) {
 	if result.Error != nil {
 		return videos, result.Error
 	}
+	log.Println("数组存放的视频：", videos)
 	return videos, nil
 }
