@@ -58,14 +58,11 @@ func Feed(c *gin.Context) {
 
 // Publish /publish/action/
 func Publish(c *gin.Context) {
-	token := c.Query("token")
+	token := c.PostForm("token")
 	videoService := GetVideoService()
 	userid, err := videoService.GetparseTokens(token)
 	data, err := c.FormFile("data")
-	log.Println("转化前token: ", token)
-	log.Println("转化前id: ", userid)
 	userId := int64(userid)
-	log.Println("转化后id: ", userid)
 	title := c.PostForm("title")
 	if err != nil {
 		log.Println("获取数据失败", err)
