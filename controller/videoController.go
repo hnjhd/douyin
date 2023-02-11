@@ -23,19 +23,30 @@ type VideoListResponse struct {
 
 // Feed /feed/
 func Feed(c *gin.Context) {
-	createTime := c.Query("latest_time")
-	var lastTime time.Time
-	if createTime != "0" {
-		temp, _ := strconv.ParseInt(createTime, 10, 64)
-		if len(createTime) > 10 {
-			temp /= 1000
-		}
-		lastTime = time.Unix(temp, 0)
-	} else {
-		lastTime = time.Now()
-	}
+	// 前端客户端传递时间有问题，先暴力处理
+	// createTime := c.Query("latest_time")
+	// var lastTime time.Time
+	// length := len(createTime)
+	// if (length == 10 || length == 13){
+	// 	temp, _ := strconv.ParseInt(createTime, 10, 64)
+	// 	if length == 13 {
+	// 		temp /= 1000
+	// 	}
+	// 	lastTime = time.Unix(temp, 0)
+	// 	if temp < 0 {
+	// 		lastTime = time.Now()
+	// 	}
+	// } else {
+	// 	lastTime = time.Now()
+	// }
+	lastTime := time.Now()
 	videoService := GetVideoService()
-	userId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	token := c.Query("token")
+	userid, err := videoService.GetparseTokens(token)
+	if err != nil {
+		userid = 0
+	}
+	userId := int64(userid)
 	feed, nextTime, err := videoService.Feed(lastTime, userId)
 	if err != nil {
 		c.JSON(http.StatusOK, FeedResponse{
@@ -72,7 +83,6 @@ func Publish(c *gin.Context) {
 		})
 		return
 	}
-	// videoService := GetVideoService()
 	err = videoService.Publish(data, userId, title)
 	if err != nil {
 		log.Println("上传视频失败", err)

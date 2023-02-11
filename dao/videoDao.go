@@ -107,6 +107,5 @@ func GetVideoByLastTime(lastTime time.Time) ([]TableVideo, error) {
 	if result.Error != nil {
 		return videos, result.Error
 	}
-	log.Println("数组存放的视频：", videos)
 	return videos, nil
 }
