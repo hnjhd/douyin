@@ -27,7 +27,11 @@ func (videoService VideoServiceImpl) Feed(lastTime time.Time, userId int64) ([]V
 		log.Println("videoService.copyVideos(&videos, &tableVideos, userId) 失败", err)
 		return nil, time.Time{}, err
 	}
-	return videos, tableVideos[len(tableVideos) - 1].PublishTime, nil
+	length := len(tableVideos) - 1
+	if length <= 0 {
+		return videos, time.Time{}, nil
+	}
+	return videos, tableVideos[length].PublishTime, nil
 }
 
 // GetVideo
