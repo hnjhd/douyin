@@ -92,8 +92,10 @@ func Publish(c *gin.Context) {
 func PublishList(c *gin.Context) {
 	Id, _ := c.GetQuery("user_id")
 	userId, _ := strconv.ParseInt(Id, 10, 64)
-	curId, _ := strconv.ParseInt(c.GetString("userId"), 10, 64)
+	token := c.Query("token")
 	videoService := GetVideoService()
+	curid, err := videoService.GetparseTokens(token)
+	curId := int64(curid)
 	list, err := videoService.List(userId, curId)
 	if err != nil {
 		log.Println("获取视频列表失败")
