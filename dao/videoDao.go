@@ -19,9 +19,9 @@ type TableVideo struct {
 	Title       string `json:"title"`
 }
 
-func (TableVideo) TableName() string {
-	return "videos"
-}
+// func (TableVideo) TableName() string {
+// 	return "videos"
+// }
 
 // 根据作者id查询视频
 func GetVideosByAuthorId(authorId int64) ([]TableVideo, error) {
@@ -56,6 +56,7 @@ func GetVideosByVideoId(videoId int64) (TableVideo, error) {
 
 // 通过FTP上传视频
 func VideoFTP(file io.Reader, videoName string) error {
+	ftp.TIKTOK_FTP.Cwd("~")
 	err := ftp.TIKTOK_FTP.Cwd("videos")
 	if err != nil {
 		log.Println("切换到videos路径失败")
@@ -70,13 +71,13 @@ func VideoFTP(file io.Reader, videoName string) error {
 }
 
 // 通过FTP上传图片
-func ImageFTP(file io.Reader, videoName string) error {
+func ImageFTP(file io.Reader, imageName string) error {
 	err := ftp.TIKTOK_FTP.Cwd("images")
 	if err != nil {
 		log.Println("切换到images路径失败")
 		return err
 	}
-	err = ftp.TIKTOK_FTP.Stor(videoName, file)
+	err = ftp.TIKTOK_FTP.Stor(imageName, file)
 	if err != nil {
 		log.Println("上传失败")
 		return err
@@ -106,5 +107,6 @@ func GetVideoByLastTime(lastTime time.Time) ([]TableVideo, error) {
 	if result.Error != nil {
 		return videos, result.Error
 	}
+	log.Println("数组存放的视频：", videos)
 	return videos, nil
 }
