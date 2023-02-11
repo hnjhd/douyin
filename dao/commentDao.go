@@ -19,23 +19,7 @@ type Comment struct {
 
 // TableName 修改表名映射
 func (Comment) TableName() string {
-	return "gov_comment"
-}
-
-// Count
-// 1、使用video id 查询Comment数量
-func Count(videoId int64) (int64, error) {
-	log.Println("CommentDao-Count: running") //函数已运行
-	//Init()
-	var count int64
-	//数据库中查询评论数量
-	err := DB.Model(Comment{}).Where(map[string]interface{}{"video_id": videoId, "cancel": 0}).Count(&count).Error
-	if err != nil {
-		log.Println("CommentDao-Count: return count failed") //函数返回提示错误信息
-		return -1, errors.New("find comments count failed")
-	}
-	log.Println("CommentDao-Count: return count success") //函数执行成功，返回正确信息
-	return count, nil
+	return "comment"
 }
 
 // CommentIdList 根据视频id获取评论id 列表

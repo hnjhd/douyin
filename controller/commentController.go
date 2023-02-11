@@ -2,6 +2,7 @@ package controller
 
 import (
 	"TikTok/dao"
+	"TikTok/service"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -37,55 +38,29 @@ type CommentActionResponse struct {
 
 func GetList(videoId int64, userId int64) ([]Comment, error) {
 	log.Println("GetList: running") //函数已运行
-	//法一、使用SQL语句查询评论列表及用户信息，嵌套user信息。且导致提高耦合性。
-	//1.查找CommentData结构体的信息
-	commentData := make([]Comment, 1)
-	result := dao.DB.Raw("select T.cid id,T.user_id user_id,T.`name`,T.follow_count,T.follower_count,"+
-		"\nif(f.cancel is null,'false','true') is_follow,"+
-		"\nT.comment_text content,T.create_date"+
-		"\nfrom follows f right join\n("+
-		"\n\tselect cid,vid,id user_id,`name`,comment_text,create_date,"+
-		"\n\tcount(if(tag = 'follower' and cancel is not null,1,null)) follower_count,"+
-		"\n\tcount(if(tag = 'follow' and cancel is not null,1,null)) follow_count"+
-		"\n\tfrom\n\t("+
-		"\n\t\tselect c.id cid,u.id,c.video_id vid,`name`,f.cancel,comment_text,create_date,'follower' tag"+
-		"\n\t\tfrom comments c join users u on c.user_id = u.id and c.cancel = 0"+
-		"\n\t\tleft join follows f on u.id = f.user_id and f.cancel = 0"+
-		"\n\t\tunion all"+
-		"\n\t\tselect c.id cid,u.id,c.video_id vid,`name`,f.cancel,comment_text,create_date,'follow' tag"+
-		"\n\t\tfrom comments c join users u on c.user_id = u.id and c.cancel = 0"+
-		"\n\t\tleft join follows f on u.id = f.follower_id and f.cancel = 0"+
-		"\n\t\t) T\n\t\tgroup by cid,vid,id,`name`,comment_text,create_date"+
-		"\n) T on f.follower_id = T.user_id and f.cancel = 0 and f.user_id = ?"+
-		"\nwhere vid = ? group by cid order by create_date desc", userId, videoId).Scan(&commentData)
-
-	err := result.Error
-
-	if nil != err {
-		log.Println("CommentService-GetList: sql error") //sql查询出错
-		return nil, err
+	commentData, err := dao.GetCommentList(videoId)
+	if err != nil {
+		log.Println("sql query failed")
 	}
 	//当前有0条评论
-	if result.RowsAffected == 0 {
+	if len(commentData) == 0 {
 		return nil, nil
 	}
 	//2.拼接
 	commentInfoList := make([]Comment, 0, len(commentData))
 	for _, comment := range commentData {
 		userData := user{
-			Id:   uint(comment.Id),
-			Name: comment.User.Name,
+			Id: uint(comment.Id),
 		}
 		_commentInfo := Comment{
-			Id:      comment.Id,
-			User:    userData,
-			Content: comment.Content,
+			Id:         comment.Id,
+			User:       userData,
+			Content:    comment.CommentText,
+			CreateDate: comment.CreateDate.String(),
 		}
 		//3.组装list
 		commentInfoList = append(commentInfoList, _commentInfo)
 	}
-	//-----------------------法一结束--------------------------
-
 	sort.Sort(CommentSlice(commentInfoList))
 	return commentInfoList, nil
 }
@@ -100,7 +75,55 @@ func (a CommentSlice) Swap(i, j int) { //重写Swap()方法
 	a[i], a[j] = a[j], a[i]
 }
 func (a CommentSlice) Less(i, j int) bool { //重写Less()方法
-	return a[i].Id > a[j].Id
+	return a[i].CreateDate > a[j].CreateDate
+}
+
+// CommentList
+// 查看评论列表 comment/list/
+func CommentList(c *gin.Context) {
+	log.Println("CommentController-Comment_List: running") //函数已运行
+	//获取userId
+	token := c.Query("token")
+	usi := service.UserServiceImpl{}
+	userId, err := usi.GetparseTokens(token)
+	//获取videoId
+	videoId, err := strconv.ParseInt(c.Query("video_id"), 10, 64)
+	//错误处理
+	if err != nil {
+		c.JSON(http.StatusOK, Response{
+			StatusCode: -1,
+			StatusMsg:  "comment videoId json invalid",
+		})
+		log.Println("CommentController-Comment_List: return videoId json invalid") //视频id格式有误
+		return
+	}
+	log.Printf("videoId:%v", videoId)
+
+	//commentService := new(service.CommentServiceImpl)
+	commentList, err := GetList(videoId, int64(userId))
+
+	//commentList, err := commentService.GetListFromRedis(videoId, userId)
+	if err != nil { //获取评论列表失败
+		c.JSON(http.StatusOK, CommentListResponse{
+			Response: Response{
+				StatusCode: -1,
+				StatusMsg:  err.Error(),
+			},
+		})
+		log.Println("CommentController-Comment_List: return list false") //查询列表失败
+		return
+	}
+
+	//获取评论列表成功
+	c.JSON(http.StatusOK, CommentListResponse{
+		Response: Response{
+			StatusCode: 0,
+			StatusMsg:  "get comment list success",
+		},
+		CommentList: commentList,
+	})
+	log.Println("CommentController-Comment_List: return success") //成功返回列表
+	return
 }
 
 // CommentAction
@@ -108,9 +131,10 @@ func (a CommentSlice) Less(i, j int) bool { //重写Less()方法
 func CommentAction(c *gin.Context) {
 	log.Println("CommentController-Comment_Action: running") //函数已运行
 	//获取userId
-	id, _ := c.Get("userId")
-	userid, _ := id.(string)
-	userId, err := strconv.ParseInt(userid, 10, 64)
+	var token string = c.Query("token")
+	usi := service.UserServiceImpl{}
+	userId, err := usi.GetparseTokens(token)
+
 	log.Printf("err:%v", err)
 	log.Printf("userId:%v", userId)
 	//错误处理
@@ -152,7 +176,7 @@ func CommentAction(c *gin.Context) {
 
 		//发表评论数据准备
 		var sendComment dao.Comment
-		sendComment.UserId = userId
+		sendComment.UserId = int64(userId)
 		sendComment.VideoId = videoId
 		sendComment.CommentText = content
 		timeNow := time.Now()
@@ -227,55 +251,4 @@ func CommentAction(c *gin.Context) {
 		log.Println("CommentController-Comment_Action: return delete success") //函数执行成功，返回正确信息
 		return
 	}
-}
-
-// CommentList
-// 查看评论列表 comment/list/
-func CommentList(c *gin.Context) {
-	log.Println("CommentController-Comment_List: running") //函数已运行
-	//获取userId
-	id, _ := c.Get("userId")
-	userid, _ := id.(string)
-	userId, err := strconv.ParseInt(userid, 10, 64)
-	//log.Printf("err:%v", err)
-	//log.Printf("userId:%v", userId)
-
-	//获取videoId
-	videoId, err := strconv.ParseInt(c.Query("video_id"), 10, 64)
-	//错误处理
-	if err != nil {
-		c.JSON(http.StatusOK, Response{
-			StatusCode: -1,
-			StatusMsg:  "comment videoId json invalid",
-		})
-		log.Println("CommentController-Comment_List: return videoId json invalid") //视频id格式有误
-		return
-	}
-	log.Printf("videoId:%v", videoId)
-
-	//commentService := new(service.CommentServiceImpl)
-	commentList, err := GetList(videoId, userId)
-
-	//commentList, err := commentService.GetListFromRedis(videoId, userId)
-	if err != nil { //获取评论列表失败
-		c.JSON(http.StatusOK, CommentListResponse{
-			Response: Response{
-				StatusCode: -1,
-				StatusMsg:  err.Error(),
-			},
-		})
-		log.Println("CommentController-Comment_List: return list false") //查询列表失败
-		return
-	}
-
-	//获取评论列表成功
-	c.JSON(http.StatusOK, CommentListResponse{
-		Response: Response{
-			StatusCode: 0,
-			StatusMsg:  "get comment list success",
-		},
-		CommentList: commentList,
-	})
-	log.Println("CommentController-Comment_List: return success") //成功返回列表
-	return
 }
