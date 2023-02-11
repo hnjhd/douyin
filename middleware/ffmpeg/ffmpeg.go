@@ -55,7 +55,7 @@ func Ffmpeg(videoName string, imageName string) error {
 		log.Println("ssh session创建失败", err)
 	}
 	defer session.Close()
-	command , err := session.CombinedOutput("ls;/usr/local/ffmpeg/bin/ffmpeg -ss 00:00:01 -i /var/ftp/tiktok/videos/" + videoName + ".mp4 -vframes 1 /var/ftp/tiktok/images/" + imageName + ".jpg")
+	command , err := session.CombinedOutput("ls;/usr/local/ffmpeg/bin/ffmpeg -ss 00:00:01 -i /home/ftpjc/tiktok/videos/" + videoName + ".mp4 -vframes 1 /home/ftpjc/tiktok/images/" + imageName + ".jpg")
 	if err != nil {
 		log.Println("session.CombinedOutput() 失败", string(command))
 		return err
