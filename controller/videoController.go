@@ -24,22 +24,18 @@ type VideoListResponse struct {
 // Feed /feed/
 func Feed(c *gin.Context) {
 	// 前端客户端传递时间有问题，先暴力处理
-	// createTime := c.Query("latest_time")
-	// var lastTime time.Time
-	// length := len(createTime)
-	// if (length == 10 || length == 13){
-	// 	temp, _ := strconv.ParseInt(createTime, 10, 64)
-	// 	if length == 13 {
-	// 		temp /= 1000
-	// 	}
-	// 	lastTime = time.Unix(temp, 0)
-	// 	if temp < 0 {
-	// 		lastTime = time.Now()
-	// 	}
-	// } else {
-	// 	lastTime = time.Now()
-	// }
-	lastTime := time.Now()
+	createTime := c.Query("latest_time")
+	var lastTime time.Time
+	length := len(createTime)
+	if (length == 10 || length == 13){
+		temp, _ := strconv.ParseInt(createTime, 10, 64)
+		if length == 13 {
+			temp /= 1000
+		}
+		lastTime = time.Unix(temp, 0)
+	} else {
+		lastTime = time.Now()
+	}
 	videoService := GetVideoService()
 	token := c.Query("token")
 	userid, err := videoService.GetparseTokens(token)

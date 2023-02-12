@@ -8,10 +8,10 @@ import (
 
 type Video struct {
 	dao.TableVideo
-	Author UserDTO `json:"author"`
-	FavoriteCount int64 `json:"favorite_count"`
-	CommentCount int64 `json:"comment_count"`
-	IsFavorite bool `json:"is_favorite"`
+	Author        UserDTO `json:"author"`
+	FavoriteCount int64   `json:"favorite_count"`
+	CommentCount  int64   `json:"comment_count"`
+	IsFavorite    bool    `json:"is_favorite"`
 }
 
 type VideoService interface {
