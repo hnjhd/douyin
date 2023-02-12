@@ -46,7 +46,7 @@ func GetList(videoId int64, userId int64) ([]Comment, error) {
 	if len(commentData) == 0 {
 		return nil, nil
 	}
-	//2.拼接
+	//拼接
 	commentInfoList := make([]Comment, 0, len(commentData))
 	for _, comment := range commentData {
 		userData := user{
