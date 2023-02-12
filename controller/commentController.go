@@ -52,11 +52,12 @@ func GetList(videoId int64, userId int64) ([]Comment, error) {
 		userData := user{
 			Id: uint(comment.Id),
 		}
+
 		_commentInfo := Comment{
 			Id:         comment.Id,
 			User:       userData,
 			Content:    comment.CommentText,
-			CreateDate: comment.CreateDate.String(),
+			CreateDate: comment.CreateDate.Format("01-02"),
 		}
 		//3.组装list
 		commentInfoList = append(commentInfoList, _commentInfo)
@@ -208,7 +209,7 @@ func CommentAction(c *gin.Context) {
 					Id: uint(userId),
 				},
 				Content:    content,
-				CreateDate: timeNow.GoString(),
+				CreateDate: timeNow.Format("01-02"),
 			},
 		})
 		log.Println("CommentController-Comment_Action: return Send success") //发表评论成功，返回正确信息
