@@ -1,7 +1,7 @@
 package config
 
 // 每次获取视频的数量
-const VideoCount = 5
+const VideoCount = 3
 
 // 存储视频连接
 const PLAY_URL_PREFIX = "http://124.71.58.18/videos/"

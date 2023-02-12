@@ -6,22 +6,16 @@ import (
 	"io"
 	"log"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type TableVideo struct {
-	Model       gorm.Model `gorm:"embedded"`
+	Id          int64 `json:"id"`
 	AuthorId    int64
 	PlayUrl     string `json:"play_url"`
 	CoverUrl    string `json:"cover_url"`
 	PublishTime time.Time
 	Title       string `json:"title"`
 }
-
-// func (TableVideo) TableName() string {
-// 	return "videos"
-// }
 
 // 根据作者id查询视频
 func GetVideosByAuthorId(authorId int64) ([]TableVideo, error) {
@@ -46,7 +40,7 @@ func GetVideoIdsByAuthorId(authorId int64) ([]int64, error) {
 // 根据视频id查询视频
 func GetVideosByVideoId(videoId int64) (TableVideo, error) {
 	var tableVideo TableVideo
-	tableVideo.Model.ID = uint(videoId)
+	tableVideo.Id = videoId
 	result := DB.First(&tableVideo)
 	if result.Error != nil {
 		return tableVideo, result.Error
